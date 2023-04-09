@@ -4,9 +4,9 @@
 
 import telegram
 import host.os // For os.env.get.
-import monitor
-import openai
 import system.storage
+
+import .chat_bot
 
 /**
 If there is a gap of more than MAX_GAP between messages, we clear the
@@ -54,7 +54,7 @@ When running on an ESP32 there is typically a second file that contains
   the credentials and calls this function.
 */
 main --telegram_token/string --openai_key/string --chat_password/string:
-  bot := ChatBot
+  bot := TelegramChatBot
       --telegram_token=telegram_token
       --openai_key=openai_key
       --chat_password=chat_password
@@ -68,8 +68,7 @@ class TimestampedMessage:
 
   constructor --.text --.timestamp --.is_from_assistant:
 
-class ChatBot:
-  openai_client_/openai.Client? := ?
+class TelegramChatBot extends ChatBot:
   telegram_client_/telegram.Client? := ?
 
   bucket_/storage.Bucket
@@ -84,15 +83,10 @@ class ChatBot:
   // Set of chat-ids that were already asked to authenticate.
   reported_authentication_requests_/Set := {}
 
-  // Maps from chat-id to deque.
-  // Only authenticated chat-ids are in this map.
-  all_messages_/Map := {:}
-
   constructor
       --telegram_token/string
       --openai_key/string
       --chat_password/string:
-    openai_client_ = openai.Client --key=openai_key
     telegram_client_ = telegram.Client --token=telegram_token
     password_ = chat_password
 
@@ -104,6 +98,14 @@ class ChatBot:
     my_name_ = my_user.first_name
     if my_user.last_name:
       my_name_ += " " + my_user.last_name
+
+    super --openai_key=openai_key
+
+  close:
+    super
+    if telegram_client_:
+      telegram_client_.close
+      telegram_client_ = null
 
   run:
     telegram_client_.listen: | update/telegram.Update? |
@@ -132,19 +134,23 @@ class ChatBot:
         send_authentication_error_ chat_id
         continue.listen
 
-      store_message_ message --chat_id=chat_id
+      user := extract_author_ message
+      prefix := user == "" ? "" : "$user: "
+      text := ?
+      if user == "":
+        text = message.text
+      else:
+        text = "$user: $message.text"
+      print "Got message: $text"
+
+      store_message_ text --chat_id=chat_id --timestamp=message.date
 
       if is_for_me:
         // Allow the update and the message to be garbage collected.
         update = null
         message = null
 
-        conversation := build_conversation_ chat_id
-        response := openai_client_.complete_chat
-            --conversation=conversation
-            --max_tokens=300
-        store_assistant_response_ response --chat_id=chat_id
-        send_message_ response --chat_id=chat_id
+        send_response_ chat_id
 
   /**
   Returns whether the $message has a mention for $username.
@@ -160,48 +166,9 @@ class ChatBot:
         return true
     return false
 
-  /** Returns the messages for the given $chat_id. */
-  messages_for_ chat_id/int -> Deque:
-    return all_messages_.get chat_id --init=: Deque
-
   /** Writes the updated $authenticated_ list to the storage bucket. */
   write_updated_authenticated_:
     bucket_[AUTHENTICATED_KEY] = authenticated_
-
-  /**
-  Drops old messages from all watched chats.
-  Uses the $MAX_GAP constant to determine if a chat has moved on to
-    a new topic (which leads to a new conversation for the AI bot).
-  */
-  clear_old_messages_:
-    now := Time.now
-    all_messages_.do: | chat_id/int messages/Deque |
-      if messages.is_empty: continue.do
-      last_message := messages.last
-      if (last_message.timestamp.to now) > MAX_GAP:
-        print "Clearing $chat_id"
-        messages.clear
-
-  /**
-  Builds an OpenAI conversation for the given $chat_id.
-
-  Returns a list of $openai.ChatMessage objects.
-  */
-  build_conversation_ chat_id/int -> List:
-    result := [
-      openai.ChatMessage.system "You are contributing to chat of potentially multiple people. Your name is '$my_name_'. Be short.",
-    ]
-    messages := messages_for_ chat_id
-    messages.do: | timestamped_message/TimestampedMessage |
-      if timestamped_message.is_from_assistant:
-        result.add (openai.ChatMessage.assistant timestamped_message.text)
-      else:
-        // We are not combining multiple messages from the user.
-        // Typically, the chat is a back and forth between the user and
-        // the assistant. For memory reasons we prefer to make individual
-        // messages.
-        result.add (openai.ChatMessage.user timestamped_message.text)
-    return result
 
   /** Extracts the author from the given $message. */
   extract_author_ message/telegram.Message -> string:
@@ -211,41 +178,6 @@ class ChatBot:
     if message.from.last_name:
       result += " " + message.from.last_name
     return result
-
-  /** Stores the $response that the assistant produced in the chat. */
-  store_assistant_response_ response/string --chat_id/int:
-    messages := messages_for_ chat_id
-    messages.add (TimestampedMessage
-      --text=response
-      --timestamp=Time.now
-      --is_from_assistant)
-
-  /**
-  Stores a user-provided $message in the list of messages for the
-    given $chat_id.
-  */
-  store_message_ message/telegram.Message --chat_id/int -> none:
-    messages := messages_for_ chat_id
-    // Drop messages if we have too many of them.
-    if messages.size >= MAX_MESSAGES:
-        messages.remove_first
-
-    user := extract_author_ message
-    prefix := user == "" ? "" : "$user: "
-    text := ?
-    if user == "":
-      text = message.text
-    else:
-      text = "$user: $message.text"
-    print "Got message: $text"
-    new_timestamped_message := TimestampedMessage
-        // We store the user with the message.
-        // This is mainly so we don't need to create a new string
-        // when we create the conversation.
-        --text=text
-        --timestamp=message.date
-        --is_from_assistant=false
-    messages.add new_timestamped_message
 
   /**
   Whether the given $chat_id is authenticated.

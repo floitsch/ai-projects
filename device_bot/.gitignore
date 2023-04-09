@@ -1,0 +1,5 @@
+.env
+discord_esp32.toit
+discord_esp32_*.toit
+telegram_esp32.toit
+telegram_esp32_*.toit

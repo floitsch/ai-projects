@@ -1,0 +1,13 @@
+dependencies:
+  discord:
+    url: github.com/floitsch/toit-discord
+    version: ^0.2.0
+  host:
+    url: github.com/toitlang/pkg-host
+    version: ^1.9.0
+  openai:
+    url: github.com/toitware/toit-openai
+    version: ^0.1.0
+  telegram:
+    url: github.com/floitsch/toit-telegram
+    version: ^0.1.1

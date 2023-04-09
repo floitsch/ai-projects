@@ -1,0 +1,57 @@
+sdk: ^2.0.0-alpha.64
+prefixes:
+  device_bot: device-bot
+  discord: toit-discord
+  hc_sr04: toit-hc-sr04
+  host: pkg-host
+  pixel_strip: toit-pixel-strip
+  telegram: toit-telegram
+packages:
+  device-bot:
+    url: github.com/floitsch/device-bot
+    version: 0.1.0
+    hash: bc2759dff265dace0fb3c9a0e8281065f06f61c7
+    prefixes:
+      host: pkg-host
+      openai: toit-openai
+  pkg-host:
+    url: github.com/toitlang/pkg-host
+    version: 1.9.0
+    hash: 76e4dc5328a5c3739e97f65ed196d05058071359
+  pkg-http:
+    url: github.com/toitlang/pkg-http
+    version: 2.1.0
+    hash: 54cb9c5e06d53da3d5608ea7454b9113de079c15
+  toit-cert-roots:
+    url: github.com/toitware/toit-cert-roots
+    version: 1.4.0
+    hash: bf41ee60ebba65ba01bc9ba1aa6d697e4cc4a8c7
+  toit-discord:
+    url: github.com/floitsch/toit-discord
+    version: 0.1.0
+    hash: 117caa44df37c0ae5822e2a79269f605a3793b53
+    prefixes:
+      certificate_roots: toit-cert-roots
+      http: pkg-http
+  toit-hc-sr04:
+    url: github.com/lask/toit-hc-sr04
+    version: 2.0.0
+    hash: c740e8341179fe45b377db826222c23d223629b9
+  toit-openai:
+    url: github.com/toitware/toit-openai
+    version: 0.1.0
+    hash: a4fe0353b2491779f59263dd089e091c7dc9db8d
+    prefixes:
+      certificate_roots: toit-cert-roots
+      http: pkg-http
+  toit-pixel-strip:
+    url: github.com/toitware/toit-pixel-strip
+    version: 0.3.0
+    hash: 6afc86f08e0e751a58a4f56b119d5e14464a4762
+  toit-telegram:
+    url: github.com/floitsch/toit-telegram
+    version: 0.1.0
+    hash: 2d8e950b23124a6f01f9b44c1a73be6ca2b549cb
+    prefixes:
+      certificate_roots: toit-cert-roots
+      http: pkg-http
