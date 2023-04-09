@@ -10,8 +10,7 @@ discussion when mentioned.
 See [chat](chat).
 
 ## Device Bot
-A small application, using the
-[device-bot](https://pkg.toit.io/package/github.com%2Ffloitsch%2Fdevice-bot)
-package.
+A small [application](device_bot), using the `device-bot` package to give
+an ESP32 some intelligence.
 
-The code is the one used It can be used to control a device from a chat bot.
+[![Watch the video](https://img.youtube.com/vi/DNfOBLt1f9s/maxresdefault.jpg)](https://youtu.be/DNfOBLt1f9s)
