@@ -8,7 +8,7 @@ prefixes:
   telegram: toit-telegram
 packages:
   device-bot:
-    url: github.com/floitsch/device-bot
+    url: github.com/floitsch/toit-device-bot
     version: 0.1.0
     hash: bc2759dff265dace0fb3c9a0e8281065f06f61c7
     prefixes:

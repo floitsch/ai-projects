@@ -1,6 +1,6 @@
 dependencies:
   device_bot:
-    url: github.com/floitsch/device-bot
+    url: github.com/floitsch/toit-device-bot
     version: ^0.1.0
   discord:
     url: github.com/floitsch/toit-discord
