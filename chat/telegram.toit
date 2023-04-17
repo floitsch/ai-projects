@@ -91,7 +91,14 @@ class TelegramChatBot extends ChatBot:
     password_ = chat_password
 
     bucket_ = storage.Bucket.open BUCKET_ID
-    authenticated_ = bucket_.get AUTHENTICATED_KEY --if_absent=: []
+    auth := bucket_.get AUTHENTICATED_KEY
+    if not auth:
+      auth = []
+    else:
+      // Make a copy so we can modify it later.
+      auth = auth.map: it
+
+    authenticated_ = auth
 
     my_user/telegram.User? := telegram_client_.get_me
     my_username_ = my_user.username
