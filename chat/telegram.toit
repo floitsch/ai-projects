@@ -61,13 +61,6 @@ main --telegram_token/string --openai_key/string --chat_password/string:
 
   bot.run
 
-class TimestampedMessage:
-  text/string
-  timestamp/Time
-  is_from_assistant/bool
-
-  constructor --.text --.timestamp --.is_from_assistant:
-
 class TelegramChatBot extends ChatBot:
   telegram_client_/telegram.Client? := ?
 
