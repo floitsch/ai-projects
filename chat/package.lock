@@ -19,8 +19,8 @@ packages:
     hash: bf41ee60ebba65ba01bc9ba1aa6d697e4cc4a8c7
   toit-discord:
     url: github.com/floitsch/toit-discord
-    version: 0.2.0
-    hash: 78468ac8bb1b5d1c8f631aa15e877a04176eab1f
+    version: 0.3.0
+    hash: 71220a5f0b6cdab4ca504dbb6abc68a87064bfd6
     prefixes:
       certificate_roots: toit-cert-roots
       http: pkg-http
