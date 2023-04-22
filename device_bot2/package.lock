@@ -19,8 +19,8 @@ packages:
     hash: bf41ee60ebba65ba01bc9ba1aa6d697e4cc4a8c7
   toit-device-bot:
     url: github.com/floitsch/toit-device-bot
-    version: 0.1.1
-    hash: bc2759dff265dace0fb3c9a0e8281065f06f61c7
+    version: 0.2.1
+    hash: b7463fc191221615ee830a8aabd63793bd25584b
     prefixes:
       host: pkg-host
       openai: toit-openai

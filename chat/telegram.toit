@@ -108,7 +108,7 @@ class TelegramChatBot extends ChatBot:
       telegram_client_ = null
 
   run:
-    telegram_client_.listen: | update/telegram.Update? |
+    telegram_client_.listen --ignore_old: | update/telegram.Update? |
       // Eagerly clear old messages to relieve memory pressure.
       clear_old_messages_
 

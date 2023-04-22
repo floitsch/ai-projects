@@ -33,8 +33,8 @@ packages:
       http: pkg-http
   toit-telegram:
     url: github.com/floitsch/toit-telegram
-    version: 0.2.0
-    hash: dcfc92fa87716d7d7eac5c62d00233d5b902a860
+    version: 0.3.0
+    hash: f5b5c1ca590b5896945b97d938eb217498041229
     prefixes:
       certificate_roots: toit-cert-roots
       http: pkg-http
