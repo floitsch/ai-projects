@@ -74,6 +74,12 @@ class DiscordChatBot extends ChatBot:
       | discord.INTENT_DIRECT_MESSAGES
       | discord.INTENT_GUILD_MESSAGE_CONTENT
 
+    accepted_forum_types := {
+      discord.Channel.TYPE_GUILD_TEXT,
+      discord.Channel.TYPE_GUILD_FORUM,
+      discord.Channel.TYPE_PUBLIC_THREAD
+    }
+
     discord_client_.listen --intents=intents: | event/discord.Event? |
       clear_old_messages_
 
@@ -93,18 +99,17 @@ class DiscordChatBot extends ChatBot:
       if not public_channels_.contains channel_id and
           not private_channels_.contains channel_id:
         channel := discord_client_.channel channel_id
-        if channel.type != discord.Channel.TYPE_GUILD_TEXT:
+        if not accepted_forum_types.contains channel.type:
           private_channels_.add channel_id
         else:
           public_channels_.add channel_id
 
-      if private_channels_.contains channel_id:
-        send_message_ "Sorry, I don't talk to strangers." --chat_id=channel_id
-        continue.listen
-
-      print "channel_id: $channel_id"
       is_for_me := (message.mentions.any: it.id == my_id_) or
           (message.mention_roles.any: (roles.get guild_id --if_absent=:[]).contains it)
+
+      if private_channels_.contains channel_id:
+        if is_for_me: send_message_ "Sorry, I am shy in private 🙊" --chat_id=channel_id
+        continue.listen
 
       content := message.content
       author := message.author.username
