@@ -1,7 +1,7 @@
 dependencies:
   discord:
     url: github.com/floitsch/toit-discord
-    version: ^0.3.0
+    version: ^0.3.1
   host:
     url: github.com/toitlang/pkg-host
     version: ^1.9.0

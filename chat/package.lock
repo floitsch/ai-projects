@@ -1,4 +1,4 @@
-sdk: ^2.0.0-alpha.64
+sdk: ^2.0.0-alpha.79
 prefixes:
   discord: toit-discord
   host: pkg-host
@@ -11,16 +11,16 @@ packages:
     hash: 76e4dc5328a5c3739e97f65ed196d05058071359
   pkg-http:
     url: github.com/toitlang/pkg-http
-    version: 2.1.0
-    hash: 54cb9c5e06d53da3d5608ea7454b9113de079c15
+    version: 2.3.0
+    hash: 05ce2065a75813138d2c4ca1bab03e7a6f0541a2
   toit-cert-roots:
     url: github.com/toitware/toit-cert-roots
-    version: 1.4.0
-    hash: bf41ee60ebba65ba01bc9ba1aa6d697e4cc4a8c7
+    version: 1.5.0
+    hash: 27a9f9ff3d337b6128e98e220126e3cc275bcd73
   toit-discord:
     url: github.com/floitsch/toit-discord
-    version: 0.3.0
-    hash: 71220a5f0b6cdab4ca504dbb6abc68a87064bfd6
+    version: 0.3.1
+    hash: d0fae664c4a972eef729ab2b810ef3cf7c3a2443
     prefixes:
       certificate_roots: toit-cert-roots
       http: pkg-http
