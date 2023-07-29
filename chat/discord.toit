@@ -136,4 +136,7 @@ main --discord_token/string --discord_url/string? --openai_key/string:
       --discord_token=discord_token
       --openai_key=openai_key
 
-  bot.run
+  while true:
+    catch --trace:
+      bot.run
+    sleep --ms=5_000
