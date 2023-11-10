@@ -26,7 +26,7 @@ Main entry point when running on the Desktop.
 
 Takes the credentials from environment variables.
 */
-main:
+main args:
   telegram_token := os.env.get "TELEGRAM_TOKEN"
   if not telegram_token or telegram_token == "":
     print "Please set the TELEGRAM_TOKEN environment variable."
@@ -37,6 +37,8 @@ main:
     print "Please set the OPENAI_KEY environment variable."
     return
 
+  openai_model := args.is_empty ? null : args[0]
+
   chat_password := os.env.get "CHAT_PASSWORD"
   if not chat_password or chat_password == "":
     print "Please set the CHAT_PASSWORD environment variable."
@@ -45,6 +47,7 @@ main:
   main
       --telegram_token=telegram_token
       --openai_key=openai_key
+      --openai_model=openai_model
       --chat_password=chat_password
 
 /**
@@ -53,10 +56,15 @@ Main entry point after the credentials have been set.
 When running on an ESP32 there is typically a second file that contains
   the credentials and calls this function.
 */
-main --telegram_token/string --openai_key/string --chat_password/string:
+main
+    --telegram_token/string
+    --openai_key/string
+    --openai_model/string?=null
+    --chat_password/string:
   bot := TelegramChatBot
       --telegram_token=telegram_token
       --openai_key=openai_key
+      --openai_model=openai_model
       --chat_password=chat_password
 
   bot.run
@@ -73,12 +81,10 @@ class TelegramChatBot extends ChatBot:
   my_name_/string
   my_username_/string
 
-  // Set of chat-ids that were already asked to authenticate.
-  reported_authentication_requests_/Set := {}
-
   constructor
       --telegram_token/string
       --openai_key/string
+      --openai_model/string?=null
       --chat_password/string:
     telegram_client_ = telegram.Client --token=telegram_token
     password_ = chat_password
@@ -99,7 +105,7 @@ class TelegramChatBot extends ChatBot:
     if my_user.last_name:
       my_name_ += " " + my_user.last_name
 
-    super --openai_key=openai_key
+    super --openai_key=openai_key --openai_model=openai_model
 
   close:
     super
@@ -123,24 +129,29 @@ class TelegramChatBot extends ChatBot:
         continue.listen
 
       chat_id := message.chat.id
-      is_for_me := (message.chat and message.chat.type == telegram.Chat.TYPE_PRIVATE) or
-          mentions_ message my_username_
+      is_direct_chat := message.chat and message.chat.type == telegram.Chat.TYPE_PRIVATE
+      is_for_me := is_direct_chat or mentions_ message my_username_
 
       if is_for_me and message.text.starts_with "/authenticate":
         authenticate_ message.text chat_id
         continue.listen
 
       if not is_authenticated_ chat_id:
-        send_authentication_error_ chat_id
+        if is_for_me:
+          send_message_ --chat_id=chat_id
+              "This chat is not authenticated. Run /authenticate <pw> $chat_id."
         continue.listen
 
-      user := extract_author_ message
-      prefix := user == "" ? "" : "$user: "
       text := ?
-      if user == "":
+      if is_direct_chat:
         text = message.text
       else:
-        text = "$user: $message.text"
+        user := extract_author_ message
+        prefix := user == "" ? "" : "$user: "
+        if user == "":
+          text = message.text
+        else:
+          text = "$user: $message.text"
       print "Got message: $text"
 
       store_message_ text --chat_id=chat_id --timestamp=message.date
@@ -219,19 +230,6 @@ class TelegramChatBot extends ChatBot:
       return
 
     send_message_ --chat_id=chat_id "Invalid password."
-
-  /**
-  Sends an authentication error with a request to provide the password.
-
-  If the chat already received an authentication error, we don't send
-    another one.
-  */
-  send_authentication_error_ chat_id/int:
-    if reported_authentication_requests_.contains chat_id:
-      return
-    send_message_ --chat_id=chat_id
-        "This chat ($chat_id) is not authenticated. Please provide the password."
-    reported_authentication_requests_.add chat_id
 
   /** Sends a message to the telegram chat. */
   send_message_ text/string --chat_id/int:

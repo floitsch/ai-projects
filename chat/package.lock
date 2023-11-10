@@ -2,6 +2,7 @@ sdk: ^2.0.0-alpha.79
 prefixes:
   discord: toit-discord
   host: pkg-host
+  ntp: pkg-ntp
   openai: toit-openai
   telegram: toit-telegram
 packages:
@@ -11,30 +12,32 @@ packages:
     hash: 76e4dc5328a5c3739e97f65ed196d05058071359
   pkg-http:
     url: github.com/toitlang/pkg-http
-    version: 2.3.0
-    hash: 05ce2065a75813138d2c4ca1bab03e7a6f0541a2
+    version: 2.3.3
+    hash: 1e9de1eade90e9dbe0bab62a11c7bcc9914664d0
+  pkg-ntp:
+    url: github.com/toitlang/pkg-ntp
+    version: 1.0.0
+    hash: 1c3cc4a4819f459393f00efc576f66f838665719
   toit-cert-roots:
     url: github.com/toitware/toit-cert-roots
     version: 1.5.0
     hash: 27a9f9ff3d337b6128e98e220126e3cc275bcd73
   toit-discord:
     url: github.com/floitsch/toit-discord
-    version: 0.3.1
-    hash: d0fae664c4a972eef729ab2b810ef3cf7c3a2443
+    version: 0.3.3
+    hash: da2ef7c2408343dbe7b191946d0c2bbf662b2cda
     prefixes:
       certificate_roots: toit-cert-roots
       http: pkg-http
   toit-openai:
-    url: github.com/toitware/toit-openai
-    version: 0.1.0
-    hash: a4fe0353b2491779f59263dd089e091c7dc9db8d
+    path: ../../toit-openai
     prefixes:
       certificate_roots: toit-cert-roots
       http: pkg-http
   toit-telegram:
     url: github.com/floitsch/toit-telegram
-    version: 0.3.0
-    hash: f5b5c1ca590b5896945b97d938eb217498041229
+    version: 0.5.2
+    hash: 86f963b32a97f3d473d4261c19cb9af3f0354688
     prefixes:
       certificate_roots: toit-cert-roots
       http: pkg-http

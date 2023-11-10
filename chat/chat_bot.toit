@@ -3,6 +3,8 @@
 // in the LICENSE file.
 
 import openai
+import ntp
+import esp32 show adjust_real_time_clock
 
 /**
 If there is a gap of more than MAX_GAP between messages, we clear the
@@ -23,13 +25,17 @@ abstract class ChatBot:
   // The client is created lazily, to avoid memory pressure during startup.
   openai_client_/openai.Client? := null
   openai_key_/string? := ?
+  openai_model_/string?
+
+  last_ntp_sync_/Time? := null
 
   // Maps from chat-id to deque.
   // Only authenticated chat-ids are in this map.
   all_messages_/Map := {:}
 
-  constructor --openai_key/string:
+  constructor --openai_key/string --openai_model/string?=null:
     openai_key_ = openai_key
+    openai_model_ = openai_model
 
   close:
     if openai_client_:
@@ -63,12 +69,27 @@ abstract class ChatBot:
     a new topic (which leads to a new conversation for the AI bot).
   */
   clear_old_messages_:
-    now := Time.now
+    now := ?
+    if not last_ntp_sync_ or (Duration.since last_ntp_sync_) > (Duration --h=12):
+      ntp_result := ntp.synchronize
+      if ntp_result:
+        adjust_real_time_clock ntp_result.adjustment
+      // If the NTP sync failed, we don't do anything.
+      now = Time.now
+      last_ntp_sync_ = now
+    else:
+      now = Time.now
+
+    if now < (Time.utc --year=1971 --month=1 --day=1):
+      // The clock is not set. We can't do anything.
+      print "Clock is not set. Can't clear old messages."
+      return
     all_messages_.do: | chat_id/any messages/Deque |
+      print "Message size: $chat_id $messages.size"
       if messages.is_empty: continue.do
       last_message := messages.last
       if (last_message.timestamp.to now) > MAX_GAP:
-        print "Clearing $chat_id"
+        print "Clearing old messages for chat $chat_id."
         messages.clear
 
   /**
@@ -126,7 +147,7 @@ abstract class ChatBot:
   send_response_ chat_id/any:
     if not openai_client_:
       if not openai_key_: throw "Closed"
-      openai_client_ = openai.Client --key=openai_key_
+      openai_client_ = openai.Client --key=openai_key_ --chat_model=openai_model_
 
     conversation := build_conversation_ chat_id
     response := openai_client_.complete_chat
