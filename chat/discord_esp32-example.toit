@@ -2,14 +2,14 @@
 // Use of this source code is governed by a MIT-style license that can be found
 // in the LICENSE file.
 
-import .discord as real_main
+import .discord as real-main
 
-DISCORD_TOKEN ::= "INSERT YOUR TOKEN HERE"
-DISCORD_URL ::= "INSERT YOUR AUTHENTICATION URL HERE"
-OPENAI_KEY ::= "INSERT YOUR KEY HERE"
+DISCORD-TOKEN ::= "INSERT YOUR TOKEN HERE"
+DISCORD-URL ::= "INSERT YOUR AUTHENTICATION URL HERE"
+OPENAI-KEY ::= "INSERT YOUR KEY HERE"
 
 main:
-  real_main.main
-      --discord_token=DISCORD_TOKEN
-      --discord_url=DISCORD_URL
-      --openai_key=OPENAI_KEY
+  real-main.main
+      --discord-token=DISCORD-TOKEN
+      --discord-url=DISCORD-URL
+      --openai-key=OPENAI-KEY

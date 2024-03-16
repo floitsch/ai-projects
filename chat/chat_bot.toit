@@ -4,88 +4,88 @@
 
 import openai
 import ntp
-import esp32 show adjust_real_time_clock
+import esp32 show adjust-real-time-clock
 
 /**
 If there is a gap of more than MAX_GAP between messages, we clear the
 conversation.
 */
-MAX_GAP ::= Duration --m=3
+MAX-GAP ::= Duration --m=3
 /** The maximum number of messages we keep in memory for each chat. */
-MAX_MESSAGES ::= 20
+MAX-MESSAGES ::= 20
 
 class TimestampedMessage:
   text/string
   timestamp/Time
-  is_from_assistant/bool
+  is-from-assistant/bool
 
-  constructor --.text --.timestamp --.is_from_assistant:
+  constructor --.text --.timestamp --.is-from-assistant:
 
 abstract class ChatBot:
   // The client is created lazily, to avoid memory pressure during startup.
-  openai_client_/openai.Client? := null
-  openai_key_/string? := ?
-  openai_model_/string?
+  openai-client_/openai.Client? := null
+  openai-key_/string? := ?
+  openai-model_/string?
 
-  last_ntp_sync_/Time? := null
+  last-ntp-sync_/Time? := null
 
   // Maps from chat-id to deque.
   // Only authenticated chat-ids are in this map.
-  all_messages_/Map := {:}
+  all-messages_/Map := {:}
 
-  constructor --openai_key/string --openai_model/string?=null:
-    openai_key_ = openai_key
-    openai_model_ = openai_model
+  constructor --openai-key/string --openai-model/string?=null:
+    openai-key_ = openai-key
+    openai-model_ = openai-model
 
   close:
-    if openai_client_:
-      openai_client_.close
-      openai_client_ = null
-      openai_key_ = null
+    if openai-client_:
+      openai-client_.close
+      openai-client_ = null
+      openai-key_ = null
 
   /** The name of the bot. Sent as a system message. */
-  abstract my_name_ -> string
+  abstract my-name_ -> string
 
-  /** Sends a message to the given $chat_id. */
-  abstract send_message_ text/string --chat_id/any
+  /** Sends a message to the given $chat-id. */
+  abstract send-message_ text/string --chat-id/any
 
   /**
   Runs the bot.
 
   # Inheritance
-  Run $clear_old_messages_ before handling a new event from the server.
-  If the message is a text message, call $store_message_.
-  If the message is for the bot, call $send_response_.
+  Run $clear-old-messages_ before handling a new event from the server.
+  If the message is a text message, call $store-message_.
+  If the message is for the bot, call $send-response_.
   */
   abstract run -> none
 
-  /** Returns the messages for the given $chat_id. */
-  messages_for_ chat_id/any -> Deque:
-    return all_messages_.get chat_id --init=: Deque
+  /** Returns the messages for the given $chat-id. */
+  messages-for_ chat-id/any -> Deque:
+    return all-messages_.get chat-id --init=: Deque
 
-  handle-message_ text/string --chat_id/any --timestamp/Time=Time.now --is-for-me/bool:
+  handle-message_ text/string --chat-id/any --timestamp/Time=Time.now --is-for-me/bool:
     if is-for-me and text == "RESET":
-      all_messages_.remove chat_id
+      all-messages_.remove chat-id
       return
 
-    store_message_ text --chat_id=chat_id --timestamp=timestamp
+    store-message_ text --chat-id=chat-id --timestamp=timestamp
     if is-for-me:
-      send_response_ chat_id
+      send-response_ chat-id
 
   /**
   Drops old messages from all watched chats.
-  Uses the $MAX_GAP constant to determine if a chat has moved on to
+  Uses the $MAX-GAP constant to determine if a chat has moved on to
     a new topic (which leads to a new conversation for the AI bot).
   */
-  clear_old_messages_:
+  clear-old-messages_:
     now := ?
-    if not last_ntp_sync_ or (Duration.since last_ntp_sync_) > (Duration --h=12):
-      ntp_result := ntp.synchronize
-      if ntp_result:
-        adjust_real_time_clock ntp_result.adjustment
+    if not last-ntp-sync_ or (Duration.since last-ntp-sync_) > (Duration --h=12):
+      ntp-result := ntp.synchronize
+      if ntp-result:
+        adjust-real-time-clock ntp-result.adjustment
       // If the NTP sync failed, we don't do anything.
       now = Time.now
-      last_ntp_sync_ = now
+      last-ntp-sync_ = now
     else:
       now = Time.now
 
@@ -93,74 +93,74 @@ abstract class ChatBot:
       // The clock is not set. We can't do anything.
       print "Clock is not set. Can't clear old messages."
       return
-    all_messages_.do: | chat_id/any messages/Deque |
-      print "Message size: $chat_id $messages.size"
-      if messages.is_empty: continue.do
-      last_message := messages.last
-      if (last_message.timestamp.to now) > MAX_GAP:
-        print "Clearing old messages for chat $chat_id."
+    all-messages_.do: | chat-id/any messages/Deque |
+      print "Message size: $chat-id $messages.size"
+      if messages.is-empty: continue.do
+      last-message := messages.last
+      if (last-message.timestamp.to now) > MAX-GAP:
+        print "Clearing old messages for chat $chat-id."
         messages.clear
 
   /**
-  Builds an OpenAI conversation for the given $chat_id.
+  Builds an OpenAI conversation for the given $chat-id.
 
   Returns a list of $openai.ChatMessage objects.
   */
-  build_conversation_ chat_id/any -> List:
+  build-conversation_ chat-id/any -> List:
     result := [
-      openai.ChatMessage.system "You are contributing to chat of potentially multiple people. Your name is '$my_name_'. Be short.",
+      openai.ChatMessage.system "You are contributing to chat of potentially multiple people. Your name is '$my-name_'. Be short.",
     ]
-    messages := messages_for_ chat_id
-    messages.do: | timestamped_message/TimestampedMessage |
-      if timestamped_message.is_from_assistant:
-        result.add (openai.ChatMessage.assistant timestamped_message.text)
+    messages := messages-for_ chat-id
+    messages.do: | timestamped-message/TimestampedMessage |
+      if timestamped-message.is-from-assistant:
+        result.add (openai.ChatMessage.assistant timestamped-message.text)
       else:
         // We are not combining multiple messages from the user.
         // Typically, the chat is a back and forth between the user and
         // the assistant. For memory reasons we prefer to make individual
         // messages.
-        result.add (openai.ChatMessage.user timestamped_message.text)
+        result.add (openai.ChatMessage.user timestamped-message.text)
     return result
 
   /** Stores the $response that the assistant produced in the chat. */
-  store_assistant_response_ response/string --chat_id/any:
-    messages := messages_for_ chat_id
+  store-assistant-response_ response/string --chat-id/any:
+    messages := messages-for_ chat-id
     messages.add (TimestampedMessage
       --text=response
       --timestamp=Time.now
-      --is_from_assistant)
+      --is-from-assistant)
 
   /**
   Stores a user-provided $text in the list of messages for the
-    given $chat_id.
+    given $chat-id.
   The $text should contain the name of the author.
   */
-  store_message_ text/string --chat_id/any --timestamp/Time=Time.now -> none:
-    messages := messages_for_ chat_id
+  store-message_ text/string --chat-id/any --timestamp/Time=Time.now -> none:
+    messages := messages-for_ chat-id
     // Drop messages if we have too many of them.
-    if messages.size >= MAX_MESSAGES:
-        messages.remove_first
+    if messages.size >= MAX-MESSAGES:
+        messages.remove-first
 
-    new_timestamped_message := TimestampedMessage
+    new-timestamped-message := TimestampedMessage
         // We store the user with the message.
         // This is mainly so we don't need to create a new string
         // when we create the conversation.
         --text=text
         --timestamp=timestamp
-        --is_from_assistant=false
-    messages.add new_timestamped_message
+        --is-from-assistant=false
+    messages.add new-timestamped-message
 
   /**
-  Sends a response to the given $chat_id.
+  Sends a response to the given $chat-id.
   */
-  send_response_ chat_id/any:
-    if not openai_client_:
-      if not openai_key_: throw "Closed"
-      openai_client_ = openai.Client --key=openai_key_ --chat_model=openai_model_
+  send-response_ chat-id/any:
+    if not openai-client_:
+      if not openai-key_: throw "Closed"
+      openai-client_ = openai.Client --key=openai-key_ --chat-model=openai-model_
 
-    conversation := build_conversation_ chat_id
-    response := openai_client_.complete_chat
+    conversation := build-conversation_ chat-id
+    response := openai-client_.complete-chat
         --conversation=conversation
-        --max_tokens=300
-    store_assistant_response_ response --chat_id=chat_id
-    send_message_ response --chat_id=chat_id
+        --max-tokens=300
+    store-assistant-response_ response --chat-id=chat-id
+    send-message_ response --chat-id=chat-id
