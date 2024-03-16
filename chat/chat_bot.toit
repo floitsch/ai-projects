@@ -63,6 +63,15 @@ abstract class ChatBot:
   messages_for_ chat_id/any -> Deque:
     return all_messages_.get chat_id --init=: Deque
 
+  handle-message_ text/string --chat_id/any --timestamp/Time=Time.now --is-for-me/bool:
+    if is-for-me and text == "RESET":
+      all_messages_.remove chat_id
+      return
+
+    store_message_ text --chat_id=chat_id --timestamp=timestamp
+    if is-for-me:
+      send_response_ chat_id
+
   /**
   Drops old messages from all watched chats.
   Uses the $MAX_GAP constant to determine if a chat has moved on to

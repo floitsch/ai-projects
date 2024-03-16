@@ -119,10 +119,7 @@ class DiscordChatBot extends ChatBot:
       text := "$author: $content"
       print "Message: $text"
 
-      store_message_ text --chat_id=channel_id
-
-      if is_for_me:
-        send_response_ channel_id
+      handle-message_ text --chat-id=channel_id --is-for-me=is-for-me
 
   send_message_ text/string --chat_id/string:
     discord_mutex_.do:

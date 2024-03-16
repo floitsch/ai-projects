@@ -154,14 +154,11 @@ class TelegramChatBot extends ChatBot:
           text = "$user: $message.text"
       print "Got message: $text"
 
-      store_message_ text --chat_id=chat_id --timestamp=message.date
-
-      if is_for_me:
-        // Allow the update and the message to be garbage collected.
-        update = null
-        message = null
-
-        send_response_ chat_id
+      timestamp := message.date
+      // Allow the update and the message to be garbage collected.
+      update = null
+      message = null
+      handle-message_ text --chat-id=chat_id --timestamp=timestamp --is-for-me=is-for-me
 
   /**
   Returns whether the $message has a mention for $username.
