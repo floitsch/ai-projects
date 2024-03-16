@@ -1,0 +1,28 @@
+sdk: ^2.0.0-alpha.128
+prefixes:
+  host: pkg-host
+  openai: toit-openai
+packages:
+  pkg-host:
+    url: github.com/toitlang/pkg-host
+    name: host
+    version: 1.14.1
+    hash: da453fb59f7ef3d37f39e4b438495f7c16614733
+  pkg-http:
+    url: github.com/toitlang/pkg-http
+    name: http
+    version: 2.4.1
+    hash: a15ed241395a5234fd76503f2366510e863241f8
+  toit-cert-roots:
+    url: github.com/toitware/toit-cert-roots
+    name: certificate_roots
+    version: 1.6.1
+    hash: 55d3be82ed53d8d332338b2de931865cf69fe48b
+  toit-openai:
+    url: github.com/toitware/toit-openai
+    name: openai
+    version: 0.2.1
+    hash: 2279a2782f42104486ef55dd10b5dc1454f4d530
+    prefixes:
+      certificate_roots: toit-cert-roots
+      http: pkg-http
