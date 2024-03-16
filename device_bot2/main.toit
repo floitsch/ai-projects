@@ -3,24 +3,24 @@
 // in the LICENSE file.
 
 import telegram
-import device_bot show *
+import device-bot show *
 import gpio
 import dhtxx.dht11
 
-LED_GREEN_PIN ::= 23
-LED_RED_PIN ::= 22
+LED-GREEN-PIN ::= 23
+LED-RED-PIN ::= 22
 
 class Leds:
-  pin_green_/gpio.Pin
-  pin_red_/gpio.Pin
+  pin-green_/gpio.Pin
+  pin-red_/gpio.Pin
 
   constructor:
-    pin_green_ = gpio.Pin LED_GREEN_PIN --output
-    pin_red_ = gpio.Pin LED_RED_PIN --output
+    pin-green_ = gpio.Pin LED-GREEN-PIN --output
+    pin-red_ = gpio.Pin LED-RED-PIN --output
 
   close:
-    pin_green_.close
-    pin_red_.close
+    pin-green_.close
+    pin-red_.close
 
   functions -> List:
     return [
@@ -28,23 +28,23 @@ class Leds:
           --syntax="green_led(<true|false>)"
           --description="Turns the green LED on or off."
           --action=:: | args/List |
-            pin_green_.set (args[0] ? 1 : 0),
+            pin-green_.set (args[0] ? 1 : 0),
       Function
           --syntax="red_led(<true|false>)"
           --description="Turns the red LED on or off."
           --action=:: | args/List |
-            pin_red_.set (args[0] ? 1 : 0),
+            pin-red_.set (args[0] ? 1 : 0),
     ]
 
 
-DHT11_PIN ::= 32
+DHT11-PIN ::= 32
 
 class Dht11Sensor:
   data_/gpio.Pin
   sensor_/dht11.Dht11
 
   constructor:
-    data_ = gpio.Pin DHT11_PIN
+    data_ = gpio.Pin DHT11-PIN
     sensor_ = dht11.Dht11 data_
 
   close:
@@ -55,11 +55,11 @@ class Dht11Sensor:
       Function
           --syntax="temperature()"
           --description="Reads the temperature in C as a float"
-          --action=:: sensor_.read_temperature,
+          --action=:: sensor_.read-temperature,
       Function
           --syntax="humidity()"
           --description="Reads the humidity in % as a float"
-          --action=:: sensor_.read_humidity,
+          --action=:: sensor_.read-humidity,
     ]
 
 /**
@@ -68,19 +68,19 @@ Main entry point.
 Take the checked-in 'esp32-example.toit' and rename it to esp32.toit.
 Then add your credentials, and install it on your ESP32.
 */
-main --openai_key/string --telegram_token/string:
+main --openai-key/string --telegram-token/string:
   leds := Leds
-  dht11_sensor := Dht11Sensor
+  dht11-sensor := Dht11Sensor
 
-  print dht11_sensor.sensor_.read_temperature
+  print dht11-sensor.sensor_.read-temperature
 
   // Connect to Telegram
-  telegram_client := telegram.Client --token=telegram_token
+  telegram-client := telegram.Client --token=telegram-token
 
   // Keep track of the last chat-id we've seen.
   // A more sophisticated bot would need to make sure that
   // only authenticated users can manipulate the device.
-  chat_id/int? := null
+  chat-id/int? := null
 
   // Give the device a way to send messages to us.
   functions := [
@@ -89,22 +89,22 @@ main --openai_key/string --telegram_token/string:
       --description="Print a message"
       --action=:: | args/List |
         message := args[0]
-        telegram_client.send_message --chat_id=chat_id "$message"
+        telegram-client.send-message --chat-id=chat-id "$message"
   ]
-  functions.add_all leds.functions
-  functions.add_all dht11_sensor.functions
+  functions.add-all leds.functions
+  functions.add-all dht11-sensor.functions
 
   // Create a device bot.
-  device_bot := DeviceBot --openai_key=openai_key functions
+  device-bot := DeviceBot --openai-key=openai-key functions
 
   // Start listening to new messages and interpret them.
-  telegram_client.listen: | update/telegram.Update |
+  telegram-client.listen: | update/telegram.Update |
     if update is telegram.UpdateMessage:
       print "Got message: $update"
       message/telegram.Message? := (update as telegram.UpdateMessage).message
       if message.text == "/start":
         continue.listen
 
-      chat_id = message.chat.id
-      device_bot.handle_message message.text --when_started=::
-        telegram_client.send_message --chat_id=chat_id "Running"
+      chat-id = message.chat.id
+      device-bot.handle-message message.text --when-started=::
+        telegram-client.send-message --chat-id=chat-id "Running"

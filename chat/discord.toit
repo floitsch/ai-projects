@@ -5,83 +5,83 @@
 import discord
 import host.os // For os.env.get.
 import monitor
-import .chat_bot
+import .chat-bot
 
 main:
-  discord_token := os.env.get "DISCORD_TOKEN"
-  if not discord_token or discord_token == "":
+  discord-token := os.env.get "DISCORD_TOKEN"
+  if not discord-token or discord-token == "":
     print "Please set the DISCORD_TOKEN environment variable."
     return
 
-  discord_url := os.env.get "DISCORD_URL"
+  discord-url := os.env.get "DISCORD_URL"
 
-  openai_key := os.env.get "OPENAI_KEY"
-  if not openai_key or openai_key == "":
+  openai-key := os.env.get "OPENAI_KEY"
+  if not openai-key or openai-key == "":
     print "Please set the OPENAI_KEY environment variable."
     return
 
   main
-      --discord_token=discord_token
-      --discord_url=discord_url
-      --openai_key=openai_key
+      --discord-token=discord-token
+      --discord-url=discord-url
+      --openai-key=openai-key
 
 
 class DiscordChatBot extends ChatBot:
-  discord_client_/discord.Client? := ?
-  discord_mutex_/monitor.Mutex
+  discord-client_/discord.Client? := ?
+  discord-mutex_/monitor.Mutex
 
-  my_id_/string? := null
-  my_name_/string? := null
+  my-id_/string? := null
+  my-name_/string? := null
 
   // Remember private channels, so we don't need to look them up all the time.
-  private_channels_ := {}
-  public_channels_ := {}
+  private-channels_ := {}
+  public-channels_ := {}
 
-  constructor --discord_token/string --openai_key/string:
-    discord_client_ = discord.Client --token=discord_token
-    discord_mutex_ = monitor.Mutex
+  constructor --discord-token/string --openai-key/string:
+    discord-client_ = discord.Client --token=discord-token
+    discord-mutex_ = monitor.Mutex
 
-    super --openai_key=openai_key
+    super --openai-key=openai-key
 
   close:
     super
-    if discord_client_:
-      discord_client_.close
-      discord_client_ = null
+    if discord-client_:
+      discord-client_.close
+      discord-client_ = null
 
-  get_my_roles_ -> Map:
-    me := discord_client_.me
+  get-my-roles_ -> Map:
+    me := discord-client_.me
     // We could get this information also from the ready event, but we need to
     // get our ID here anyway.
-    my_id_ = me.id
-    my_name_ = me.username
-    print "I am $my_name_ ($my_id_)"
-    guilds := discord_client_.guilds
+    my-id_ = me.id
+    my-name_ = me.username
+    print "I am $my-name_ ($my-id_)"
+    guilds := discord-client_.guilds
     result := {:}
     guilds.do: | guild/discord.Guild |
       id := guild.id
-      my_member := discord_client_.guild_member --guild_id=id --user_id=my_id_
-      result[id] = my_member.roles
+      my-member := discord-client_.guild-member --guild-id=id --user-id=my-id_
+      result[id] = my-member.roles
     return result
 
   run:
     // Map from channel id to list of roles.
-    roles := get_my_roles_
+    roles := get-my-roles_
 
     intents := 0
-      | discord.INTENT_GUILD_MEMBERS
-      | discord.INTENT_GUILD_MESSAGES
-      | discord.INTENT_DIRECT_MESSAGES
-      | discord.INTENT_GUILD_MESSAGE_CONTENT
+      | discord.INTENT-GUILD-MEMBERS
+      | discord.INTENT-GUILD-MESSAGES
+      | discord.INTENT-DIRECT-MESSAGES
+      | discord.INTENT-GUILD-MESSAGE-CONTENT
 
-    accepted_forum_types := {
-      discord.Channel.TYPE_GUILD_TEXT,
-      discord.Channel.TYPE_GUILD_FORUM,
-      discord.Channel.TYPE_PUBLIC_THREAD
+    accepted-forum-types := {
+      discord.Channel.TYPE-GUILD-TEXT,
+      discord.Channel.TYPE-GUILD-FORUM,
+      discord.Channel.TYPE-PUBLIC-THREAD
     }
 
-    discord_client_.listen --intents=intents: | event/discord.Event? |
-      clear_old_messages_
+    discord-client_.listen --intents=intents: | event/discord.Event? |
+      clear-old-messages_
 
       if event is discord.EventReady:
         print "Now listening for messages"
@@ -92,23 +92,23 @@ class DiscordChatBot extends ChatBot:
         continue.listen
 
       message/discord.Message? := (event as discord.EventMessageCreate).message
-      channel_id := message.channel_id
-      guild_id := message.guild_id
-      if message.author.id == my_id_: continue.listen
+      channel-id := message.channel-id
+      guild-id := message.guild-id
+      if message.author.id == my-id_: continue.listen
 
-      if not public_channels_.contains channel_id and
-          not private_channels_.contains channel_id:
-        channel := discord_client_.channel channel_id
-        if not accepted_forum_types.contains channel.type:
-          private_channels_.add channel_id
+      if not public-channels_.contains channel-id and
+          not private-channels_.contains channel-id:
+        channel := discord-client_.channel channel-id
+        if not accepted-forum-types.contains channel.type:
+          private-channels_.add channel-id
         else:
-          public_channels_.add channel_id
+          public-channels_.add channel-id
 
-      is_for_me := (message.mentions.any: it.id == my_id_) or
-          (message.mention_roles.any: (roles.get guild_id --if_absent=:[]).contains it)
+      is-for-me := (message.mentions.any: it.id == my-id_) or
+          (message.mention-roles.any: (roles.get guild-id --if-absent=:[]).contains it)
 
-      if private_channels_.contains channel_id:
-        if is_for_me: send_message_ "Sorry, I am shy in private 🙊" --chat_id=channel_id
+      if private-channels_.contains channel-id:
+        if is-for-me: send-message_ "Sorry, I am shy in private 🙊" --chat-id=channel-id
         continue.listen
 
       content := message.content
@@ -119,19 +119,19 @@ class DiscordChatBot extends ChatBot:
       text := "$author: $content"
       print "Message: $text"
 
-      handle-message_ text --chat-id=channel_id --is-for-me=is-for-me
+      handle-message_ text --chat-id=channel-id --is-for-me=is-for-me
 
-  send_message_ text/string --chat_id/string:
-    discord_mutex_.do:
-      discord_client_.send_message text --channel_id=chat_id
+  send-message_ text/string --chat-id/string:
+    discord-mutex_.do:
+      discord-client_.send-message text --channel-id=chat-id
 
-main --discord_token/string --discord_url/string? --openai_key/string:
-  if discord_url and discord_url != "":
-    print "To invite and authorize the bot to a channel go to $discord_url"
+main --discord-token/string --discord-url/string? --openai-key/string:
+  if discord-url and discord-url != "":
+    print "To invite and authorize the bot to a channel go to $discord-url"
 
   bot := DiscordChatBot
-      --discord_token=discord_token
-      --openai_key=openai_key
+      --discord-token=discord-token
+      --openai-key=openai-key
 
   while true:
     catch --trace:
