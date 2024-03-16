@@ -29,7 +29,7 @@ main args/List --openai-key/string:
 
   client := openai.Client
       --key=openai-key
-      --completion-max-tokens=4096
+      --chat-max-tokens=4096
       --chat-model=model
 
   conversation := [
