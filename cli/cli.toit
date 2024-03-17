@@ -2,11 +2,11 @@
 // Use of this source code is governed by a MIT-style license that can be found
 // in the LICENSE file.
 
+import fs
 import openai
 import system
 import host.pipe
 import reader show BufferedReader
-
 
 /**
 Main entry point when running on the Desktop.
@@ -14,7 +14,7 @@ Main entry point when running on the Desktop.
 Takes the credentials from environment variables.
 */
 main args/List --openai-key/string:
-  model := system.program-name == "ai4"
+  model := (fs.basename system.program-name) == "ai4"
       ? "gpt-4-turbo-preview"
       : "gpt-3.5-turbo"
 
