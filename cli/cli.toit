@@ -24,7 +24,7 @@ main args/List --openai-key/string:
     reader := BufferedReader pipe.stdin
     reader.buffer-all
     input = reader.read-string reader.buffered
-    if args.size > 2:
+    if args.size > 1:
       input = """
         $(args[..args.size - 1].join " ")
         $input"""
