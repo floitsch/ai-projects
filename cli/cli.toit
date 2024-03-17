@@ -19,11 +19,15 @@ main args/List --openai-key/string:
       : "gpt-3.5-turbo"
 
   input/string := ?
-  if args.is-empty:
+  if args.is-empty or args.last == "-":
     // Take the input from stdin.
     reader := BufferedReader pipe.stdin
     reader.buffer-all
     input = reader.read-string reader.buffered
+    if args.size > 2:
+      input = """
+        $(args[..args.size - 1].join " ")
+        $input"""
   else:
     input = args.join " "
 
