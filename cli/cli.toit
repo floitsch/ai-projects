@@ -14,9 +14,14 @@ Main entry point when running on the Desktop.
 Takes the credentials from environment variables.
 */
 main args/List --openai-key/string:
-  model := (fs.basename system.program-name) == "ai4"
-      ? "gpt-4-turbo-preview"
-      : "gpt-3.5-turbo"
+  basename := fs.basename system.program-name
+  model := ?
+  if basename == "ai4":
+    model = "gpt-4-turbo"
+  else if basename == "ai4o":
+    model = "gpt-4o"
+  else:
+    model = "gpt-3.5-turbo"
 
   input/string := ?
   if args.is-empty or args.last == "-":

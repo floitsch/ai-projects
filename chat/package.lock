@@ -1,4 +1,4 @@
-sdk: ^2.0.0-alpha.124
+sdk: ^2.0.0-alpha.145
 prefixes:
   discord: toit-discord
   host: pkg-host
@@ -9,18 +9,18 @@ packages:
   pkg-host:
     url: github.com/toitlang/pkg-host
     name: host
-    version: 1.13.0
-    hash: 64ee9e7bf1fd0e748e778a61269cd653fd748af8
+    version: 1.15.1
+    hash: ff187c2c19d695e66c3dc1d9c09b4dc6bec09088
   pkg-http:
     url: github.com/toitlang/pkg-http
     name: http
-    version: 2.3.4
-    hash: 39fe52083b4c745cc37420649a48277b45728fd2
+    version: 2.7.2
+    hash: 614dd0f374e70aab09f12e9466a35b779b9a8d63
   pkg-ntp:
     url: github.com/toitlang/pkg-ntp
     name: ntp
-    version: 1.0.0
-    hash: 1c3cc4a4819f459393f00efc576f66f838665719
+    version: 1.1.0
+    hash: e69bb1abc0d3d4aa7642eec3360e52744e4d011d
   toit-cert-roots:
     url: github.com/toitware/toit-cert-roots
     name: certificate_roots
@@ -42,8 +42,8 @@ packages:
   toit-telegram:
     url: github.com/floitsch/toit-telegram
     name: telegram
-    version: 0.5.2
-    hash: 86f963b32a97f3d473d4261c19cb9af3f0354688
+    version: 0.5.3
+    hash: 438903d35f6eae1faa7573f5f51b4fa5db3b7dff
     prefixes:
       certificate_roots: toit-cert-roots
       http: pkg-http
