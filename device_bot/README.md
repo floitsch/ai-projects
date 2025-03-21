@@ -1,6 +1,6 @@
 # An intelligent device
 
-This application uses the [device_bot](https://github.com/floitsch/device_bot)
+This application uses the [device_bot](https://github.com/floitsch/toit-device-bot)
 package to give an ESP32 some intelligence.
 
 In the video below, OpenAI simply gets the description for how to control
