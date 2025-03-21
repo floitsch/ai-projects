@@ -37,7 +37,7 @@ class Leds:
 It's trivial to add more functions to the application. As long as there
   is a `Function` object that describes the function, OpenAI can use it.
 
-[![Watch the video](https://img.youtube.com/vi/DNfOBLt1f9s/maxresdefault.jpg)](https://youtu.be/DNfOBLt1f9s)
+[![Watch the video](https://img.youtube.com/vi/_vuouQNGrDA/maxresdefault.jpg)](https://youtu.be/_vuouQNGrDA)
 
 ## Setup
 Make sure you have [Toit](toitlang.org) installed. The easiest is to use
